@@ -33,14 +33,14 @@ content = BIND(
             status=u'closed',
             titles=BIND(
                 BIND(u'Deutscher Titel', lang='de'),
-                BIND(u'Titre français', lang='fr'),
+                BIND(u'Titre fran\xe7ais', lang='fr'),
             ),
             documents=BIND(
                 BIND(
                     uuid=u'91e7b933-fe57-4b5f-ae7c-5d49ba5b70fd',
                     titles=BIND(
                         BIND(u'Deutscher Titel', lang='de'),
-                        BIND(u'Titre français', lang='fr'),
+                        BIND(u'Titre fran\xe7ais', lang='fr'),
                     ),
                     status=u'approved',
                     files=BIND(
@@ -58,4 +58,4 @@ content = BIND(
 )
 
 msg = eCH0147T1.message(header=header, content_=content)
-msg.toxml("UTF-8")
+print msg.toxml("UTF-8")
