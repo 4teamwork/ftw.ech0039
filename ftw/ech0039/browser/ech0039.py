@@ -1,7 +1,7 @@
 from Products.Five.browser import BrowserView
 from StringIO import StringIO
-from ftw.ech0039.bind import DefaultBind
 from zipfile import ZipFile
+from ftw.ech0039.bind import XMLExporter
 
 
 class ExportView(BrowserView):
@@ -9,13 +9,15 @@ class ExportView(BrowserView):
     """
 
     def __call__(self):
-        xml_content = DefaultBind(self.context).toxml()
+        xml_content = XMLExporter(self.context).toxml()
         memfile = StringIO()
         zipfile = ZipFile(memfile, mode='w')
         zipfile.writestr(self.context.title + '.xml', xml_content)
         zipfile.close()
 
-        self._write_to_response(memfile, self.context.title + '.zip')
+        filename = self.context.title.encode('utf-8') + '.zip'
+
+        self._write_to_response(memfile, filename)
 
     def _write_to_response(self, stringio, zipfilename):
         """Write content of StringIO to response and set zip-file header.

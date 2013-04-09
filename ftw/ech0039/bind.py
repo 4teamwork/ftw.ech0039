@@ -2,18 +2,20 @@ from ftw.ech0039.bindings import eCH0039
 from ftw.ech0039.bindings import eCH0058
 from ftw.ech0039.bindings import eCH0147T0
 from ftw.ech0039.bindings import eCH0147T1
-from plone.uuid.interfaces import IUUID
+from ftw.ech0039.xmlexport import IECH0039Exportable
 from pyxb import BIND
 from pyxb.binding import datatypes as xs
 from pyxb.utils.domutils import BindingDOMSupport
 from pyxb.utils.domutils import SetDOMImplementation
 import uuid
 import xml.dom.minidom
-from plone import api
 
 
-#  SetDOMImplementation is necessary to make 100% sure that there is a working
-#  zip implementation.
+# SetDOMImplementation is necessary to make 100% sure that pyxb finds a
+# working DOM implementation.
+# Pyxb does not provide a DOM-implementation name or a list of required
+# DOM-implementation features. Thus it just uses an arbitrary that might not
+# provide all the required features.
 SetDOMImplementation(xml.dom.minidom.DOMImplementation())
 
 # Namespace prefixes
@@ -23,11 +25,74 @@ BindingDOMSupport.DeclareNamespace(eCH0039.Namespace, 'eCH-0039')
 BindingDOMSupport.DeclareNamespace(eCH0058.Namespace, 'eCH-0058')
 
 
-class DefaultBind(object):
+class ContentBind(object):
+    """Knows how to fill the xml content node.
+    """
+
+    def __init__(self, *exportables):
+        self.dossiers = []
+        self.documents = []
+        for exportable in exportables:
+            self.add(exportable)
+
+    def add(self, exportable):
+        exportable.add_to(self)
+
+    def add_dossier(self, exportable_dossier):
+        self.dossiers.append(DossierBind(exportable_dossier))
+
+    def add_document(self, exportable_document):
+        self.documents.append(DocumentBind(exportable_document))
+
+    def _make_kwargs(self):
+        kwargs = dict()
+        if self.dossiers:
+            dossiers = [each.get_BIND() for each in self.dossiers]
+            kwargs['dossiers'] = BIND(*dossiers)
+        if self.documents:
+            documents = [each.get_BIND() for each in self.documents]
+            kwargs['documents'] = BIND(*documents)
+        return kwargs
+
+    def _make_args(self):
+        return []
+
+    def get_BIND(self):
+        kwargs = self._make_kwargs()
+        args = self._make_args()
+        bind = BIND(*args, **kwargs)
+        return bind
+
+
+class DossierBind(ContentBind):
+
+    def __init__(self, exportable_dossier):
+        super(DossierBind, self).__init__()
+
+        self.data = exportable_dossier.get_data()
+        self._add_children(exportable_dossier)
+
+    def _add_children(self, exportable_dossier):
+        for child in exportable_dossier.get_children():
+            self.add(child)
+
+    def _make_kwargs(self):
+        kwargs = super(DossierBind, self)._make_kwargs()
+        kwargs.update(self.data)
+        return kwargs
+
+
+class DocumentBind(ContentBind):
+
+    def __init__(self, exportable_document):
+        super(DocumentBind, self).__init__()
+        self.data = exportable_document.get_data()
+
+
+class XMLExporter(object):
 
     def __init__(self, context):
-        self._dossier = context
-        import pudb; pudb.set_trace()
+        self.exportable = IECH0039Exportable(context)
         self.header = self._bind_header()
         self.content = self._bind_content()
 
@@ -53,34 +118,6 @@ class DefaultBind(object):
         )
 
     def _bind_content(self):
-        dossier_uuid = api.content.get_uuid(obj=self._dossier)
+        bind = ContentBind(self.exportable)
+        return bind.get_BIND()
 
-        return BIND(
-            dossiers=BIND(
-                BIND(
-                    uuid=dossier_uuid,
-                    status=u'closed',
-                    titles=BIND(
-                        BIND(self._dossier.title, lang='de'),
-                    ),
-                    documents=BIND(
-                        BIND(
-                            uuid=u'91e7b933-fe57-4b5f-ae7c-5d49ba5b70fd',
-                            titles=BIND(
-                                BIND(u'Deutscher Titel', lang='de'),
-                                BIND(u'Titre fran\xe7ais', lang='fr'),
-                            ),
-                            status=u'approved',
-                            files=BIND(
-                                BIND(
-                                    pathFileName=u'files/document.doc',
-                                    mimeType=u'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                    hashCode=u'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
-                                    hashCodeAlgorithm=u'SHA-256',
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
