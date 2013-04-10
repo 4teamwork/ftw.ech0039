@@ -104,4 +104,11 @@ ivcontent = BIND(
 
 if __name__ == '__main__':
     msg = eCH0147T1.message(header=header, content_=content)
+
+    from ivbe.intranet.bindings import appcustom
+    teamraum = appcustom.teamraum()
+    teamraum.append(BIND(key='key1', value_='value1'))
+    teamraum.append(BIND(key='key2', value_='value2'))
+    msg.content_.dossiers.content()[0].applicationCustom.append(BIND(teamraum))
+
     print msg.toxml("UTF-8")
