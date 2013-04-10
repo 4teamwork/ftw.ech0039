@@ -12,12 +12,12 @@ def monkey_patch_pxb():
 
         """
 
-        result = "BIND-- "
+        result = "BIND<< "
         if self._BIND__args:
             result += pformat(self._BIND__args)
         if self._BIND__kw:
             result += pformat(self._BIND__kw)
-        result += " --"
+        result += " >>"
         return result
     BIND.__repr__ = debug_repr
 
