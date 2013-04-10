@@ -1,3 +1,4 @@
+from StringIO import StringIO
 from ftw.ech0039.bindings import eCH0039
 from ftw.ech0039.bindings import eCH0058
 from ftw.ech0039.bindings import eCH0147T0
@@ -7,6 +8,7 @@ from pyxb import BIND
 from pyxb.binding import datatypes as xs
 from pyxb.utils.domutils import BindingDOMSupport
 from pyxb.utils.domutils import SetDOMImplementation
+from zipfile import ZipFile
 import uuid
 import xml.dom.minidom
 
@@ -29,20 +31,23 @@ class ContentBind(object):
     """Knows how to fill the xml content node.
     """
 
-    def __init__(self, *exportables):
+    def __init__(self, exportable=None, zipfile=None):
         self.dossiers = []
         self.documents = []
-        for exportable in exportables:
+        self.zipfile = zipfile
+        if exportable:
             self.add(exportable)
 
     def add(self, exportable):
         exportable.add_to(self)
 
     def add_dossier(self, exportable_dossier):
-        self.dossiers.append(DossierBind(exportable_dossier))
+        self.dossiers.append(DossierBind(exportable_dossier,
+                                         zipfile=self.zipfile))
 
     def add_document(self, exportable_document):
-        self.documents.append(DocumentBind(exportable_document))
+        self.documents.append(DocumentBind(exportable_document,
+                                           zipfile=self.zipfile))
 
     def _make_kwargs(self):
         kwargs = dict()
@@ -66,8 +71,8 @@ class ContentBind(object):
 
 class DossierBind(ContentBind):
 
-    def __init__(self, exportable_dossier):
-        super(DossierBind, self).__init__()
+    def __init__(self, exportable_dossier, zipfile=None):
+        super(DossierBind, self).__init__(zipfile=zipfile)
 
         self.data = exportable_dossier.get_data()
         self._add_children(exportable_dossier)
@@ -84,17 +89,33 @@ class DossierBind(ContentBind):
 
 class DocumentBind(ContentBind):
 
-    def __init__(self, exportable_document):
-        super(DocumentBind, self).__init__()
-        self.data = exportable_document.get_data()
+    def __init__(self, exportable_document, zipfile=None):
+        super(DocumentBind, self).__init__(zipfile=zipfile)
+        self.data = exportable_document.get_data(self.zipfile)
+
+    def _make_kwargs(self):
+        kwargs = super(DocumentBind, self)._make_kwargs()
+        kwargs.update(self.data)
+        return kwargs
 
 
 class XMLExporter(object):
 
+    XML_FILENAME = 'message.xml'
+
     def __init__(self, context):
+        self.memfile = StringIO()
+        self.zipfile = ZipFile(self.memfile, mode='w')
+        self.context = context
         self.exportable = IECH0039Exportable(context)
         self.header = self._bind_header()
         self.content = self._bind_content()
+
+    def get_zipfile(self):
+        xml_content = XMLExporter(self.context).toxml()
+        self.zipfile.writestr(self.XML_FILENAME, xml_content)
+        self.zipfile.close()
+        return self.memfile
 
     def toxml(self):
         msg = eCH0147T1.message(header=self.header, content_=self.content)
@@ -118,6 +139,6 @@ class XMLExporter(object):
         )
 
     def _bind_content(self):
-        bind = ContentBind(self.exportable)
+        bind = ContentBind(exportable=self.exportable, zipfile=self.zipfile)
         return bind.get_BIND()
 
