@@ -1,6 +1,6 @@
-from unittest2.case import TestCase
-from pyxb import BIND as PYXB_BIND
 from ftw.ech0039.bind import BIND
+from pyxb import BIND as PYXB_BIND
+from unittest2.case import TestCase
 
 
 class TestBind(TestCase):
