@@ -3,6 +3,18 @@ import os
 
 version = '1.0'
 
+
+tests_require = [
+     'Products.PloneTestCase',
+     'plone.app.testing',
+     'zope.configuration',
+    ]
+
+
+extras_require = {
+    'tests': tests_require,
+    }
+
 setup(name='ftw.ech0039',
       version=version,
       description="Swiss e-government data exchange interface for Plone",
@@ -33,6 +45,8 @@ setup(name='ftw.ech0039',
           'zope.interface',
           'zope.component'
       ],
+      tests_require=tests_require,
+      extras_require=extras_require,
       entry_points="""
       # -*- Entry points: -*-
 
