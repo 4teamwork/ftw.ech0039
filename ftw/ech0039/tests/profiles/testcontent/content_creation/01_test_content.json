@@ -1,0 +1,15 @@
+[
+  {
+    "_id": "single_folder",
+    "_path": "single_folder",
+    "_type": "Folder",
+    "title": "Single Folder"
+   },
+  {
+    "_id": "single_file",
+    "_path": "single_file",
+    "_type": "File",
+    "title": "Single File",
+    "file:file": "files/data.txt"
+   }
+]

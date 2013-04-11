@@ -1,14 +1,9 @@
 from ftw.ech0039.bind import BIND
 from ftw.ech0039.testing import ECH0039_FUNCTIONAL_FIXTURE
 from ftw.ech0039.xmlexport import XMLExporter
-from plone.uuid.interfaces import IUUID
-from unittest2.case import TestCase
 from ftw.testing import MockTestCase
-from StringIO import StringIO
+from plone.uuid.interfaces import IUUID
 import hashlib
-
-
-PDF_DATA = '%PDF-1.4 fake pdf...'
 
 
 class TestECH0039Export(MockTestCase):
@@ -23,8 +18,7 @@ class TestECH0039Export(MockTestCase):
         """Test that a single folder is exported correctly as a dossier.
         """
 
-        self.portal.invokeFactory('Folder', 'folder', title=u'Folder')
-        folder_content = self.portal['folder']
+        folder_content = self.portal['single_folder']
         exporter = XMLExporter(folder_content)
 
         dossier = BIND(
@@ -33,7 +27,7 @@ class TestECH0039Export(MockTestCase):
                     uuid=IUUID(folder_content),
                     status=u'closed',
                     titles=BIND(
-                        BIND(u'Folder', lang='de'),
+                        BIND(u'Single Folder', lang='de'),
                     ),
                 ),
             ),
@@ -44,28 +38,24 @@ class TestECH0039Export(MockTestCase):
     def test_document_export(self):
         """Test that a single file is exported correctly as a document.
         """
-        memfile = StringIO(buf=PDF_DATA)
-        memfile.filename = 'file.pdf'
-        self.portal.invokeFactory('File', 'file', title=u'File',
-                                   file=memfile)
 
-        pdf_file = self.portal['file']
-        exporter = XMLExporter(pdf_file)
+        txt_file = self.portal['single_file']
+        exporter = XMLExporter(txt_file)
 
-        expected_uuid = IUUID(pdf_file)
-        hash_code = hashlib.sha256(PDF_DATA).hexdigest()
+        expected_uuid = IUUID(txt_file)
+        hash_code = hashlib.sha256('test-txt-file-content\n').hexdigest()
         document = BIND(
             documents=BIND(
                 BIND(
                     uuid=expected_uuid,
                     titles=BIND(
-                        BIND(u'File', lang='de'),
+                        BIND(u'Single File', lang='de'),
                     ),
                     status=u'approved',
                     files=BIND(
                         BIND(
-                            pathFileName=u'files/{}.pdf'.format(expected_uuid),
-                            mimeType=u'application/pdf',
+                            pathFileName=u'files/{}.txt'.format(expected_uuid),
+                            mimeType=u'text/plain',
                             hashCode=hash_code,
                             hashCodeAlgorithm=u'SHA-256',
                         ),
