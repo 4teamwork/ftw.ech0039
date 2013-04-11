@@ -119,7 +119,6 @@ class FolderExport(AbstractExport):
         return 'closed'
 
     def get_children(self):
-        monkey_patch_pxb()
         for content in self.context.listFolderContents():
             adapter = getAdapter(content, interface=IECH0039Exportable)
             if adapter:
