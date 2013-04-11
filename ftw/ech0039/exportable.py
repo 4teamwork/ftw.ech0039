@@ -3,7 +3,7 @@ from Products.CMFCore.interfaces import IFolderish
 from ftw.ech0039.bind import BIND
 from plone.uuid.interfaces import IUUID
 from zope.component import adapts
-from zope.component._api import getAdapter
+from zope.component import queryAdapter
 from zope.interface import Interface
 from zope.interface import implements
 import hashlib
@@ -121,6 +121,6 @@ class FolderAdapter(AbstractExportable):
 
     def get_children(self):
         for content in self.context.listFolderContents():
-            adapter = getAdapter(content, interface=IECH0039Exportable)
+            adapter = queryAdapter(content, interface=IECH0039Exportable)
             if adapter:
                 yield adapter
