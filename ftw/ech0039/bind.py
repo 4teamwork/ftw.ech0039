@@ -6,6 +6,7 @@ from pyxb import BIND as PYXB_BIND
 from pyxb.utils.domutils import BindingDOMSupport
 from pyxb.utils.domutils import SetDOMImplementation
 import xml.dom.minidom
+from pprint import pformat
 
 
 # SetDOMImplementation is necessary to make 100% sure that pyxb finds a
@@ -42,3 +43,12 @@ class BIND(PYXB_BIND):
     @property
     def _args(self):
         return self._BIND__args
+
+    def __repr__(self):
+        result = "BIND<< "
+        if self._BIND__args:
+            result += pformat(self._BIND__args)
+        if self._BIND__kw:
+            result += pformat(self._BIND__kw)
+        result += " >>"
+        return result

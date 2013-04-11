@@ -5,6 +5,7 @@ version = '1.0'
 
 
 tests_require = [
+     'ftw.testing',
      'Products.PloneTestCase',
      'plone.app.testing',
      'zope.configuration',

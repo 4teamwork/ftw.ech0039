@@ -3,12 +3,15 @@ from ftw.ech0039.testing import ECH0039_FUNCTIONAL_FIXTURE
 from ftw.ech0039.xmlexport import XMLExporter
 from plone.uuid.interfaces import IUUID
 from unittest2.case import TestCase
+from ftw.testing import MockTestCase
+from StringIO import StringIO
+import hashlib
 
 
 PDF_DATA = '%PDF-1.4 fake pdf...'
 
 
-class TestECH0039Export(TestCase):
+class TestECH0039Export(MockTestCase):
 
     layer = ECH0039_FUNCTIONAL_FIXTURE
 
@@ -41,10 +44,34 @@ class TestECH0039Export(TestCase):
     def test_document_export(self):
         """Test that a single file is exported correctly as a document.
         """
+        memfile = StringIO(buf=PDF_DATA)
+        memfile.filename = 'file.pdf'
         self.portal.invokeFactory('File', 'file', title=u'File',
-                                   file=PDF_DATA)
-        file_content = self.portal['file']
-        file_content.setFilename(u'file.pdf')
+                                   file=memfile)
 
-        exporter = XMLExporter(file_content)
-        exporter.content
+        pdf_file = self.portal['file']
+        exporter = XMLExporter(pdf_file)
+
+        expected_uuid = IUUID(pdf_file)
+        hash_code = hashlib.sha256(PDF_DATA).hexdigest()
+        document = BIND(
+            documents=BIND(
+                BIND(
+                    uuid=expected_uuid,
+                    titles=BIND(
+                        BIND(u'File', lang='de'),
+                    ),
+                    status=u'approved',
+                    files=BIND(
+                        BIND(
+                            pathFileName=u'files/{}.pdf'.format(expected_uuid),
+                            mimeType=u'application/pdf',
+                            hashCode=hash_code,
+                            hashCodeAlgorithm=u'SHA-256',
+                        ),
+                    ),
+                ),
+            ),
+        )
+        self.assertEqual(document, exporter.content)
+
