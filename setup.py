@@ -6,7 +6,7 @@ version = '1.0'
 setup(name='ftw.ech0039',
       version=version,
       description="Swiss e-government data exchange interface for Plone",
-      long_description=open("README.txt").read() + "\n" +
+      long_description=open("README.rst").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       # Get more strings from
       # http://pypi.python.org/pypi?:action=list_classifiers
@@ -25,8 +25,13 @@ setup(name='ftw.ech0039',
       zip_safe=False,
       install_requires=[
           'plone.api',
+          'plone.uuid',
           'setuptools',
           'PyXB',
+          'Products.CMFCore',
+          'Products.ATContentTypes',
+          'zope.interface',
+          'zope.component'
       ],
       entry_points="""
       # -*- Entry points: -*-
