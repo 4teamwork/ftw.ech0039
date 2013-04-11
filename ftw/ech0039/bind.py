@@ -1,23 +1,18 @@
-from StringIO import StringIO
 from ftw.ech0039.bindings import eCH0039
 from ftw.ech0039.bindings import eCH0058
 from ftw.ech0039.bindings import eCH0147T0
 from ftw.ech0039.bindings import eCH0147T1
-from ftw.ech0039.xmlexport import IECH0039Exportable
-from pyxb import BIND
-from pyxb.binding import datatypes as xs
+from pyxb import BIND as PYXB_BIND
 from pyxb.utils.domutils import BindingDOMSupport
 from pyxb.utils.domutils import SetDOMImplementation
-from zipfile import ZipFile
-import uuid
 import xml.dom.minidom
 
 
 # SetDOMImplementation is necessary to make 100% sure that pyxb finds a
 # working DOM implementation.
 # Pyxb does not provide a DOM-implementation name or a list of required
-# DOM-implementation features. Thus it just uses an arbitrary that might not
-# provide all the required features.
+# DOM-implementation features. Thus it just uses an arbitrary implementation
+# that might not provide all the required features.
 SetDOMImplementation(xml.dom.minidom.DOMImplementation())
 
 # Namespace prefixes
@@ -27,118 +22,23 @@ BindingDOMSupport.DeclareNamespace(eCH0039.Namespace, 'eCH-0039')
 BindingDOMSupport.DeclareNamespace(eCH0058.Namespace, 'eCH-0058')
 
 
-class ContentBind(object):
-    """Knows how to fill the xml content node.
+class BIND(PYXB_BIND):
+    """Add (limited) rich comparison support to BIND.
     """
 
-    def __init__(self, exportable=None, zipfile=None):
-        self.dossiers = []
-        self.documents = []
-        self.zipfile = zipfile
-        if exportable:
-            self.add(exportable)
+    def __eq__(self, other):
+        if isinstance(other, BIND):
+            return self._args == other._args and \
+               self._kwargs == other._kwargs
+        return NotImplemented
 
-    def add(self, exportable):
-        exportable.add_to(self)
+    def __ne__(self, other):
+        return not self == other
 
-    def add_dossier(self, exportable_dossier):
-        self.dossiers.append(DossierBind(exportable_dossier,
-                                         zipfile=self.zipfile))
+    @property
+    def _kwargs(self):
+        return self._BIND__kw
 
-    def add_document(self, exportable_document):
-        self.documents.append(DocumentBind(exportable_document,
-                                           zipfile=self.zipfile))
-
-    def _make_kwargs(self):
-        kwargs = dict()
-        if self.dossiers:
-            dossiers = [each.get_BIND() for each in self.dossiers]
-            kwargs['dossiers'] = BIND(*dossiers)
-        if self.documents:
-            documents = [each.get_BIND() for each in self.documents]
-            kwargs['documents'] = BIND(*documents)
-        return kwargs
-
-    def _make_args(self):
-        return []
-
-    def get_BIND(self):
-        kwargs = self._make_kwargs()
-        args = self._make_args()
-        bind = BIND(*args, **kwargs)
-        return bind
-
-
-class DossierBind(ContentBind):
-
-    def __init__(self, exportable_dossier, zipfile=None):
-        super(DossierBind, self).__init__(zipfile=zipfile)
-
-        self.data = exportable_dossier.get_data()
-        self._add_children(exportable_dossier)
-
-    def _add_children(self, exportable_dossier):
-        for child in exportable_dossier.get_children():
-            self.add(child)
-
-    def _make_kwargs(self):
-        kwargs = super(DossierBind, self)._make_kwargs()
-        kwargs.update(self.data)
-        return kwargs
-
-
-class DocumentBind(ContentBind):
-
-    def __init__(self, exportable_document, zipfile=None):
-        super(DocumentBind, self).__init__(zipfile=zipfile)
-        self.data = exportable_document.get_data(self.zipfile)
-
-    def _make_kwargs(self):
-        kwargs = super(DocumentBind, self)._make_kwargs()
-        kwargs.update(self.data)
-        return kwargs
-
-
-class XMLExporter(object):
-
-    XML_FILENAME = 'message.xml'
-
-    def __init__(self, context):
-        self.memfile = StringIO()
-        self.zipfile = ZipFile(self.memfile, mode='w')
-        self.context = context
-        self.exportable = IECH0039Exportable(context)
-        self.header = self._bind_header()
-        self.content = self._bind_content()
-
-    def get_zipfile(self):
-        xml_content = XMLExporter(self.context).toxml()
-        self.zipfile.writestr(self.XML_FILENAME, xml_content)
-        self.zipfile.close()
-        return self.memfile
-
-    def toxml(self):
-        msg = eCH0147T1.message(header=self.header, content_=self.content)
-        return msg.toxml("UTF-8")
-
-    def _bind_header(self):
-        return BIND(
-            senderId='plone@4teamwork.ch',
-            messageId=str(uuid.uuid4()),
-            messageType=1,
-            # messageGroup is mandatory in eCH 0030 V2.0 but was removed in V3.0
-            messageGroup=BIND(messageGroupId=1, messageTypeId=1),
-            sendingApplication=BIND(
-                manufacturer='4teamwork GmbH',
-                product='teamraum',
-                productVersion='4.0',
-            ),
-            messageDate=xs.dateTime.today(),
-            action=1,
-            testDeliveryFlag=False,
-        )
-
-    def _bind_content(self):
-        bind = ContentBind(exportable=self.exportable, zipfile=self.zipfile)
-        return bind.get_BIND()
-
+    @property
+    def _args(self):
+        return self._BIND__args

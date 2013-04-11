@@ -1,5 +1,5 @@
 from Products.Five.browser import BrowserView
-from ftw.ech0039.bind import XMLExporter
+from ftw.ech0039.xmlexport import XMLExporter
 
 
 class ExportView(BrowserView):
@@ -25,5 +25,4 @@ class ExportView(BrowserView):
         self.context.REQUEST.RESPONSE.setHeader(
                                     'Content-Disposition',
                                     ' attachment; filename=' + zipfilename)
-
         self.context.REQUEST.RESPONSE.write(stringio.getvalue())
