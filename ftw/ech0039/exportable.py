@@ -16,7 +16,7 @@ class IECH0039Exportable(Interface):
     pass
 
 
-class AbstractExport(object):
+class AbstractExportable(object):
 
     def __init__(self, context):
         self.context = context
@@ -44,7 +44,7 @@ class AbstractExport(object):
                 )
 
 
-class FileExport(AbstractExport):
+class FileAdapter(AbstractExportable):
     implements(IECH0039Exportable)
     adapts(IFileContent)
 
@@ -71,7 +71,7 @@ class FileExport(AbstractExport):
         return 'approved'
 
     def get_data(self, zipfile):
-        data = super(FileExport, self).get_data()
+        data = super(FileAdapter, self).get_data()
         #XXX export should not know about binds
 
         filename = self.context.getFilename()
@@ -93,7 +93,7 @@ class FileExport(AbstractExport):
         return data
 
 
-class FolderExport(AbstractExport):
+class FolderAdapter(AbstractExportable):
     implements(IECH0039Exportable)
     adapts(IFolderish)
 

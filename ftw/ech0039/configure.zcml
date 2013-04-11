@@ -4,8 +4,8 @@
     xmlns:i18n="http://namespaces.zope.org/i18n"
     i18n_domain="ftw.ech0039">
 
-    <adapter factory=".exportable.FileExport" />
-    <adapter factory=".exportable.FolderExport" />
+    <adapter factory=".exportable.FileAdapter" />
+    <adapter factory=".exportable.FolderAdapter" />
 
     <include package=".browser" />
 </configure>
