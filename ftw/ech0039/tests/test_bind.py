@@ -43,6 +43,9 @@ class TestBind(TestCase):
         self.assertNotEqual(self.bind_1, self.bind_2)
         self.assertNotEqual(self.bind_2, self.bind_1)
 
+        self.assertFalse(self.bind_1 == None)
+        self.assertFalse(self.bind_1 == 'gak')
+
     def test_repr(self):
         """Test that repr does not fail but don't test exact representation.
         """
