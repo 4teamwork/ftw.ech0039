@@ -42,3 +42,49 @@ class TestBind(TestCase):
         self.assertEqual(self.bind_2, self.bind_2)
         self.assertNotEqual(self.bind_1, self.bind_2)
         self.assertNotEqual(self.bind_2, self.bind_1)
+
+    def test_repr(self):
+        """Test that repr does not fail but don't test exact representation.
+        """
+
+        dossier = BIND(
+            dossiers=BIND(
+                BIND(
+                    uuid='1234-5678',
+                    status=u'closed',
+                    titles=BIND(
+                        BIND(u'Parent Folder', lang='de'),
+                    ),
+                    documents=BIND(
+                        BIND(
+                            uuid='2345-6789',
+                            titles=BIND(
+                                BIND(u'Child File', lang='de'),
+                            ),
+                            status=u'approved',
+                            files=BIND(
+                                BIND(
+                                    pathFileName='files/foo.txt',
+                                    mimeType=u'text/plain',
+                                    hashCode='kashdkajsdhklsadhksajd',
+                                    hashCodeAlgorithm=u'SHA-256',
+                                ),
+                            ),
+                        ),
+                    ),
+                    dossiers=BIND(
+                        BIND(
+                            uuid='3456-7891',
+                            status=u'closed',
+                            titles=BIND(
+                                BIND(u'Child Folder', lang='de'),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        self.assertIsNotNone(repr(dossier))
+        self.assertIsNotNone(str(dossier))
+
+        self.assertEqual(repr(dossier), str(dossier))
