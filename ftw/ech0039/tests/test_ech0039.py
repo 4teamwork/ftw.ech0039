@@ -14,7 +14,7 @@ class TestECH0039Export(MockTestCase):
         super(TestECH0039Export, self).setUp()
         self.portal = self.layer['portal']
 
-    def test_folder_dossier_export(self):
+    def test_dossier_export(self):
         """Test that a single folder is exported correctly as a dossier.
         """
 
@@ -65,3 +65,75 @@ class TestECH0039Export(MockTestCase):
         )
         self.assertEqual(document, exporter.content)
 
+    def test_nested_dossier_export(self):
+        """Test that nested folders are exported correctly as dossiers.
+        """
+
+        parent_folder = self.portal['parent_folder_1']
+        child_folder = self.portal['parent_folder_1']['child_folder']
+        exporter = XMLExporter(parent_folder)
+
+        dossier = BIND(
+            dossiers=BIND(
+                BIND(
+                    uuid=IUUID(parent_folder),
+                    status=u'closed',
+                    titles=BIND(
+                        BIND(u'Parent Folder', lang='de'),
+                    ),
+                    dossiers=BIND(
+                        BIND(
+                            uuid=IUUID(child_folder),
+                            status=u'closed',
+                            titles=BIND(
+                                BIND(u'Child Folder', lang='de'),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        self.assertEqual(dossier, exporter.content)
+
+    def test_nested_document_export(self):
+        """Test that a nested document can be exported.
+        """
+
+        parent_folder = self.portal['parent_folder_2']
+        child_file = self.portal['parent_folder_2']['child_file']
+        exporter = XMLExporter(parent_folder)
+        expected_file_uuid = IUUID(child_file)
+        expected_filename = u'files/{}.txt'.format(expected_file_uuid)
+        hash_code = hashlib.sha256('test-txt-file-content\n').hexdigest()
+
+        dossier = BIND(
+            dossiers=BIND(
+                BIND(
+                    uuid=IUUID(parent_folder),
+                    status=u'closed',
+                    titles=BIND(
+                        BIND(u'Parent Folder', lang='de'),
+                    ),
+                    documents=BIND(
+                        BIND(
+                            uuid=expected_file_uuid,
+                            titles=BIND(
+                                BIND(u'Child File', lang='de'),
+                            ),
+                            status=u'approved',
+                            files=BIND(
+                                BIND(
+                                    pathFileName=expected_filename,
+                                    mimeType=u'text/plain',
+                                    hashCode=hash_code,
+                                    hashCodeAlgorithm=u'SHA-256',
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        self.assertEqual(dossier, exporter.content)
