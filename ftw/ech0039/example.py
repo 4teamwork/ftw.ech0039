@@ -71,37 +71,6 @@ dossier = BIND(
 )
 
 
-ivcontent = BIND(
-    dossiers=BIND(
-        BIND(
-            uuid=u'369151ee-80c7-4eab-a3ca-450552433341',
-            status=u'closed',
-            titles=BIND(
-                BIND(u'Deutscher Titel', lang='de'),
-                BIND(u'Titre fran\xe7ais', lang='fr'),
-            ),
-            documents=BIND(
-                BIND(
-                    uuid=u'91e7b933-fe57-4b5f-ae7c-5d49ba5b70fd',
-                    titles=BIND(
-                        BIND(u'Deutscher Titel', lang='de'),
-                    ),
-                    status=u'approved',
-                    files=BIND(
-                        BIND(
-                            pathFileName=u'files/document.doc',
-                            mimeType=u'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                            hashCode=u'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3',
-                            hashCodeAlgorithm=u'SHA-256',
-                        ),
-                    ),
-                ),
-            ),
-        ),
-    ),
-)
-
-
 if __name__ == '__main__':
     msg = eCH0147T1.message(header=header, content_=content)
 
