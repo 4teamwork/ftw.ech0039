@@ -2,7 +2,7 @@ from StringIO import StringIO
 from ftw.ech0039.bind import BIND
 from ftw.ech0039.bindings import eCH0147T1
 from ftw.ech0039.exportable import IECH0039Exportable
-from ftw.ech0039.marshal import ContentBind
+from ftw.ech0039.marshal import ContentMarshaller
 from pyxb.binding import datatypes
 from zipfile import ZipFile
 import uuid
@@ -13,24 +13,28 @@ class XMLExporter(object):
     XML_FILENAME = 'message.xml'
 
     def __init__(self, context):
-        self.memfile = StringIO()
-        self.zipfile = ZipFile(self.memfile, mode='w')
         self.context = context
         self.exportable = IECH0039Exportable(context)
-        self.header = self._bind_header()
-        self.content = self._bind_content()
+        self.marshaller = ContentMarshaller().add(self.exportable)
 
-    def get_zipfile(self):
-        xml_content = XMLExporter(self.context).toxml()
-        self.zipfile.writestr(self.XML_FILENAME, xml_content)
-        self.zipfile.close()
-        return self.memfile
+    def make_zipfile(self):
+        memfile = StringIO()
+        zipfile = ZipFile(memfile, mode='w')
 
-    def toxml(self):
-        msg = eCH0147T1.message(header=self.header, content_=self.content)
-        return msg.toxml("UTF-8")
+        msg = eCH0147T1.message(header=self.get_header(),
+                                content_=self.get_content())
+        zipfile.writestr(self.XML_FILENAME, msg.toxml("UTF-8"))
+        self.write_files(zipfile)
+        zipfile.close()
+        return memfile
 
-    def _bind_header(self):
+    def write_files(self, zipfile):
+        self.marshaller.write_files(zipfile)
+
+    def get_content(self):
+        return self.marshaller.get_bind()
+
+    def get_header(self):
         return BIND(
             senderId='plone@4teamwork.ch',
             messageId=str(uuid.uuid4()),
@@ -46,7 +50,3 @@ class XMLExporter(object):
             action=1,
             testDeliveryFlag=False,
         )
-
-    def _bind_content(self):
-        bind = ContentBind(exportable=self.exportable, zipfile=self.zipfile)
-        return bind.get_BIND()

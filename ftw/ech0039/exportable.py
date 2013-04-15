@@ -10,6 +10,9 @@ import hashlib
 import os
 
 
+DEFAULT_MIME_TYPE = 'application/octet-stream'
+
+
 class IECH0039Exportable(Interface):
     """Marker interface for eCH-0039 exportable content."""
 
@@ -33,11 +36,10 @@ class AbstractExportable(object):
     def workflow_state(self):
         raise NotImplementedError()
 
-    def add_to(self, bind_builder):
+    def add_to(self, marshaller):
         raise NotImplementedError()
 
     def get_data(self):
-        #XXX export should not know about binds
         return dict(uuid=self.uuid,
                     status=self.workflow_state,
                     titles=BIND(BIND(self.title, lang='de'))
@@ -48,8 +50,8 @@ class FileAdapter(AbstractExportable):
     implements(IECH0039Exportable)
     adapts(IFileContent)
 
-    def add_to(self, bind_builder):
-        bind_builder.add_document(self)
+    def add_to(self, marshaller):
+        marshaller.add_document(self)
 
     @property
     def workflow_state(self):
@@ -70,35 +72,49 @@ class FileAdapter(AbstractExportable):
         #return api.content.get_state(self.context)
         return 'approved'
 
-    def get_data(self, zipfile):
-        data = super(FileAdapter, self).get_data()
-        #XXX export should not know about binds
-
+    @property
+    def file_path(self):
         filename = self.context.getFilename()
         _base, file_extension = os.path.splitext(filename)
-        filepath = u'files/{}{}'.format(self.uuid, file_extension)
+        return u'files/{}{}'.format(self.uuid, file_extension)
+
+    @property
+    def file_content(self):
+        return self.context.get_data()
+
+    @property
+    def mime_type(self):
         headers = self.context.getMetadataHeaders()
-        mime_type = dict(headers).get('Format', 'application/octet-stream')
+        return dict(headers).get('Format', DEFAULT_MIME_TYPE)
 
-        file_content = self.context.get_data()
-        hashcode = hashlib.sha256(file_content).hexdigest()
-        zipfile.writestr(filepath, file_content)
+    @property
+    def hash_code(self):
+        return hashlib.sha256(self.file_content).hexdigest()
 
+    @property
+    def hash_function_name(self):
+        return u'SHA-256'
+
+    def get_data(self):
+        data = super(FileAdapter, self).get_data()
         data['files'] = BIND(BIND(
-            pathFileName=filepath,
-            mimeType=mime_type,
-            hashCode=hashcode,
-            hashCodeAlgorithm=u'SHA-256',
+            pathFileName=self.file_path,
+            mimeType=self.mime_type,
+            hashCode=self.hash_code,
+            hashCodeAlgorithm=self.hash_function_name,
             ))
         return data
+
+    def write_file(self, zipfile):
+        zipfile.writestr(self.file_path, self.file_content)
 
 
 class FolderAdapter(AbstractExportable):
     implements(IECH0039Exportable)
     adapts(IFolderish)
 
-    def add_to(self, bind_builder):
-        bind_builder.add_dossier(self)
+    def add_to(self, marshaller):
+        marshaller.add_dossier(self)
 
     @property
     def workflow_state(self):

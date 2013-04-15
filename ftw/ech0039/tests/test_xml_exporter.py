@@ -4,14 +4,15 @@ from ftw.ech0039.xmlexport import XMLExporter
 from ftw.testing import MockTestCase
 from plone.uuid.interfaces import IUUID
 import hashlib
+from zipfile import ZipFile
 
 
-class TestECH0039Export(MockTestCase):
+class TestXmlExport(MockTestCase):
 
     layer = ECH0039_FUNCTIONAL_FIXTURE
 
     def setUp(self):
-        super(TestECH0039Export, self).setUp()
+        super(TestXmlExport, self).setUp()
         self.portal = self.layer['portal']
 
     def test_dossier_export(self):
@@ -33,7 +34,7 @@ class TestECH0039Export(MockTestCase):
             ),
         )
 
-        self.assertEqual(dossier, exporter.content)
+        self.assertEqual(dossier, exporter.get_content())
 
     def test_document_export(self):
         """Test that a single file is exported correctly as a document.
@@ -63,10 +64,10 @@ class TestECH0039Export(MockTestCase):
                 ),
             ),
         )
-        self.assertEqual(document, exporter.content)
+        self.assertEqual(document, exporter.get_content())
 
     def test_nested_dossier_export(self):
-        """Test that nested folders are exported correctly as dossiers.
+        """Test that nested folders are exported correctly.
         """
 
         parent_folder = self.portal['parent_folder_1']
@@ -94,7 +95,7 @@ class TestECH0039Export(MockTestCase):
             ),
         )
 
-        self.assertEqual(dossier, exporter.content)
+        self.assertEqual(dossier, exporter.get_content())
 
     def test_nested_document_export(self):
         """Test that a nested document can be exported.
@@ -136,4 +137,18 @@ class TestECH0039Export(MockTestCase):
             ),
         )
 
-        self.assertEqual(dossier, exporter.content)
+        self.assertEqual(dossier, exporter.get_content())
+
+    def test_zipfile_creation(self):
+        """Test that the zipfiles contain all expected files.
+        """
+
+        parent_folder = self.portal['parent_folder_2']
+        child_file = self.portal['parent_folder_2']['child_file']
+        expected_file_uuid = IUUID(child_file)
+        expected_filename = u'files/{}.txt'.format(expected_file_uuid)
+
+        memfile = XMLExporter(parent_folder).make_zipfile()
+        zipfile = ZipFile(memfile)
+        self.assertEqual([XMLExporter.XML_FILENAME, expected_filename],
+                         zipfile.namelist())
