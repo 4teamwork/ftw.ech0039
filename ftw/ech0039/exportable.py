@@ -1,10 +1,10 @@
 from Products.ATContentTypes.interfaces import IFileContent
 from Products.CMFCore.interfaces import IFolderish
 from ftw.ech0039.bind import BIND
+from ftw.ech0039.interfaces import IECH0039Document
+from ftw.ech0039.interfaces import IECH0039Dossier
 from plone.uuid.interfaces import IUUID
 from zope.component import adapts
-from zope.component import queryAdapter
-from zope.interface import Interface
 from zope.interface import implements
 import hashlib
 import os
@@ -13,16 +13,17 @@ import os
 DEFAULT_MIME_TYPE = 'application/octet-stream'
 
 
-class IECH0039Exportable(Interface):
-    """Marker interface for eCH-0039 exportable content."""
-
-    pass
-
-
 class AbstractExportable(object):
 
     def __init__(self, context):
         self.context = context
+
+    def add_to(self, marshaller):
+        raise NotImplementedError()
+
+    @property
+    def workflow_state(self):
+        raise NotImplementedError()
 
     @property
     def uuid(self):
@@ -32,13 +33,6 @@ class AbstractExportable(object):
     def title(self):
         return self.context.title
 
-    @property
-    def workflow_state(self):
-        raise NotImplementedError()
-
-    def add_to(self, marshaller):
-        raise NotImplementedError()
-
     def get_data(self):
         return dict(uuid=self.uuid,
                     status=self.workflow_state,
@@ -47,7 +41,7 @@ class AbstractExportable(object):
 
 
 class FileAdapter(AbstractExportable):
-    implements(IECH0039Exportable)
+    implements(IECH0039Document)
     adapts(IFileContent)
 
     def add_to(self, marshaller):
@@ -66,10 +60,11 @@ class FileAdapter(AbstractExportable):
             <xs:enumeration value="invalidated"/>
             <xs:enumeration value="archived"/>
             <xs:enumeration value="preserved"/>
+
+        Return approved until a a mapping for our workflow states is
+        available.
+
         """
-        # just return closed untila a mapping for our workflow states is
-        # available.
-        #return api.content.get_state(self.context)
         return 'approved'
 
     @property
@@ -110,7 +105,7 @@ class FileAdapter(AbstractExportable):
 
 
 class FolderAdapter(AbstractExportable):
-    implements(IECH0039Exportable)
+    implements(IECH0039Dossier)
     adapts(IFolderish)
 
     def add_to(self, marshaller):
@@ -129,14 +124,11 @@ class FolderAdapter(AbstractExportable):
             <xs:enumeration value="invalidated"/>
             <xs:enumeration value="in_selection"/>
             <xs:enumeration value="preserved"/>
+
+        Return closed until a a mapping for our workflow states is available.
+
         """
-        # just return closed untila a mapping for our workflow states is
-        # available.
-        #return api.content.get_state(self.context)
         return 'closed'
 
     def get_children(self):
-        for content in self.context.listFolderContents():
-            adapter = queryAdapter(content, interface=IECH0039Exportable)
-            if adapter:
-                yield adapter
+        return self.context.listFolderContents()

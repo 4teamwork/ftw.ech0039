@@ -1,4 +1,6 @@
 from ftw.ech0039.bind import BIND
+from zope.component import queryAdapter
+from ftw.ech0039.interfaces import IECH0039Exportable
 
 
 class ContentMarshaller(object):
@@ -10,7 +12,9 @@ class ContentMarshaller(object):
         self.documents = []
 
     def add(self, exportable):
-        exportable.add_to(self)
+        adapter = queryAdapter(exportable, IECH0039Exportable)
+        if adapter:
+            adapter.add_to(self)
         return self
 
     def write_files(self, zipfile):
@@ -70,12 +74,8 @@ class DocumentMarshaller(object):
         self.document = exportable_document
         self.data = self.document.get_data()
 
-    def _make_kwargs(self):
-        return self.data
-
     def write_file(self, zipfile):
         self.document.write_file(zipfile)
 
     def get_bind(self):
-        kwargs = self._make_kwargs()
-        return BIND(**kwargs)
+        return BIND(**self.data)

@@ -1,7 +1,6 @@
 from StringIO import StringIO
 from ftw.ech0039.bind import BIND
 from ftw.ech0039.bindings import eCH0147T1
-from ftw.ech0039.exportable import IECH0039Exportable
 from ftw.ech0039.marshal import ContentMarshaller
 from pyxb.binding import datatypes
 from zipfile import ZipFile
@@ -14,8 +13,7 @@ class XMLExporter(object):
 
     def __init__(self, context):
         self.context = context
-        self.exportable = IECH0039Exportable(context)
-        self.marshaller = ContentMarshaller().add(self.exportable)
+        self.marshaller = ContentMarshaller().add(self.context)
 
     def make_zipfile(self):
         memfile = StringIO()
