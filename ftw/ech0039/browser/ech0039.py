@@ -3,14 +3,12 @@ from ftw.ech0039.xmlexport import XMLExporter
 
 
 class ExportView(BrowserView):
-    """Render overview for all votes.
-    """
+
+    DEFAULT_FILENAME = 'message.zip'
 
     def __call__(self):
-
         memfile = XMLExporter(self.context).make_zipfile()
-        filename = self.context.title.encode('utf-8') + '.zip'
-        self._write_to_response(memfile, filename)
+        self._write_to_response(memfile, self.DEFAULT_FILENAME)
 
     def _write_to_response(self, stringio, zipfilename):
         """Write content of StringIO to response and set zip-file header.
