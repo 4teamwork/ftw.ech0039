@@ -2,11 +2,11 @@ from ftw.ech0039.bindings import eCH0039
 from ftw.ech0039.bindings import eCH0058
 from ftw.ech0039.bindings import eCH0147T0
 from ftw.ech0039.bindings import eCH0147T1
+from pprint import pformat
 from pyxb import BIND as PYXB_BIND
 from pyxb.utils.domutils import BindingDOMSupport
 from pyxb.utils.domutils import SetDOMImplementation
 import xml.dom.minidom
-from pprint import pformat
 
 
 # SetDOMImplementation is necessary to make 100% sure that pyxb finds a
