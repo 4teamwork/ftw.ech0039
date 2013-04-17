@@ -1,14 +1,14 @@
 from Products.Five.browser import BrowserView
 from ftw.ech0039.xmlexport import XMLExporter
+from plone.uuid.interfaces import IUUID
 
 
 class ExportView(BrowserView):
 
-    DEFAULT_FILENAME = 'message.zip'
-
     def __call__(self):
         memfile = XMLExporter(self.context).make_zipfile()
-        self._write_to_response(memfile, self.DEFAULT_FILENAME)
+        filename = IUUID(self.context)
+        self._write_to_response(memfile, filename)
 
     def _write_to_response(self, stringio, zipfilename):
         """Write content of StringIO to response and set zip-file header.
