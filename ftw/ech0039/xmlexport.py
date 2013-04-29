@@ -21,7 +21,8 @@ class XMLExporter(object):
 
         msg = eCH0147T1.message(header=self.get_header(),
                                 content_=self.get_content())
-        zipfile.writestr(self.XML_FILENAME, msg.toxml("UTF-8"))
+        zipfile.writestr(self.XML_FILENAME,
+                         msg.toDOM().toprettyxml(encoding="UTF-8"))
         self.write_files(zipfile)
         zipfile.close()
         return memfile
