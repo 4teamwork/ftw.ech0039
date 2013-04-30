@@ -3,8 +3,8 @@ from ftw.ech0039.testing import ECH0039_FUNCTIONAL_FIXTURE
 from ftw.ech0039.xmlexport import XMLExporter
 from ftw.testing import MockTestCase
 from plone.uuid.interfaces import IUUID
-import hashlib
 from zipfile import ZipFile
+import hashlib
 
 
 class TestXmlExport(MockTestCase):

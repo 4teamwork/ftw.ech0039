@@ -5,13 +5,13 @@ from plone.app.testing import TEST_USER_ID
 from plone.app.testing import setRoles
 from plone.app.testing.helpers import applyProfile
 from zope.configuration import xmlconfig
-import ftw.ech0039.tests
 
 
 class Ech0039Layer(PloneSandboxLayer):
     defaultBases = (PLONE_FIXTURE, )
 
     def setUpZope(self, app, configurationContext):
+        import ftw.ech0039.tests
         xmlconfig.file('configure.zcml', ftw.ech0039,
                        context=configurationContext)
         xmlconfig.file('testcontent.zcml', ftw.ech0039.tests,
