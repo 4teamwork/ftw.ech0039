@@ -20,4 +20,5 @@ def as_token(text):
     returns, linefeeds, or tabs.
 
     """
-    return as_normalized_string(text.strip().replace(u'  ', u' '))
+    normalized_string = as_normalized_string(text)
+    return normalized_string.strip().replace(u'  ', u' ')
