@@ -4,15 +4,13 @@
     "_path": "single_folder",
     "_type": "Folder",
     "title": "Single Folder"
-  },
-  {
+  }, {
     "_id": "single_file",
     "_path": "single_file",
     "_type": "File",
     "title": "Single File",
     "file:file": "files/data.txt"
-  },
-  {
+  }, {
     "_id": "parent_folder_1",
     "_path": "parent_folder_1",
     "_type": "Folder",
@@ -24,8 +22,7 @@
         "title": "Child Folder"
       }
     ]
-  },
-  {
+  }, {
     "_id": "parent_folder_2",
     "_path": "parent_folder_2",
     "_type": "Folder",
