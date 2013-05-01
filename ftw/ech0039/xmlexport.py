@@ -5,6 +5,7 @@ from ftw.ech0039.marshal import ContentMarshaller
 from pyxb.binding import datatypes
 from zipfile import ZipFile
 import uuid
+from plone.memoize import instance
 
 
 class XMLExporter(object):
@@ -43,6 +44,7 @@ class XMLExporter(object):
 
         return self.marshaller.get_bind()
 
+    @instance.memoize
     def get_header(self):
         """Return bound xml header.
         """
@@ -51,7 +53,7 @@ class XMLExporter(object):
             senderId='plone@4teamwork.ch',
             messageId=str(uuid.uuid4()),
             messageType=1,
-            # messageGroup is mandatory in eCH 0030 V2.0 but was removed in V3.0
+            # messageGroup is mandatory in eCH0030 V2.0 but was removed in V3.0
             messageGroup=BIND(messageGroupId=1, messageTypeId=1),
             sendingApplication=BIND(
                 manufacturer='4teamwork GmbH',
