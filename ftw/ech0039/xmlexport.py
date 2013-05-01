@@ -18,22 +18,35 @@ class XMLExporter(object):
     def make_zipfile(self):
         memfile = StringIO()
         zipfile = ZipFile(memfile, mode='w')
-
-        msg = eCH0147T1.message(header=self.get_header(),
-                                content_=self.get_content())
-        zipfile.writestr(self.XML_FILENAME,
-                         msg.toDOM().toprettyxml(encoding="UTF-8"))
+        zipfile.writestr(self.XML_FILENAME, self.get_xml_message())
         self.write_files(zipfile)
         zipfile.close()
         return memfile
 
+    def get_xml_message(self):
+        """Return the xml message as string.
+        """
+
+        msg = eCH0147T1.message(header=self.get_header(),
+                                content_=self.get_content())
+        return msg.toDOM().toprettyxml(encoding="UTF-8")
+
     def write_files(self, zipfile):
+        """Write all files to the zipfile.
+        """
+
         self.marshaller.write_files(zipfile)
 
     def get_content(self):
+        """Return bound xml content.
+        """
+
         return self.marshaller.get_bind()
 
     def get_header(self):
+        """Return bound xml header.
+        """
+
         return BIND(
             senderId='plone@4teamwork.ch',
             messageId=str(uuid.uuid4()),
