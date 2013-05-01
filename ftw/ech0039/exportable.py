@@ -1,5 +1,6 @@
 from Products.ATContentTypes.interfaces import IFileContent
 from Products.CMFCore.interfaces import IFolderish
+from collections import OrderedDict
 from ftw.ech0039.bind import BIND
 from ftw.ech0039.interfaces import IECH0039Document
 from ftw.ech0039.interfaces import IECH0039Dossier
@@ -34,10 +35,10 @@ class AbstractExportable(object):
         return self.context.title
 
     def get_data(self):
-        return dict(uuid=self.uuid,
-                    status=self.workflow_state,
-                    titles=BIND(BIND(self.title, lang='de'))
-                )
+        return OrderedDict(uuid=self.uuid,
+                           status=self.workflow_state,
+                           titles=BIND(BIND(self.title, lang='de'))
+                           )
 
 
 class FileAdapter(AbstractExportable):
