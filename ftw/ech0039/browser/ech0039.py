@@ -1,4 +1,5 @@
 from Products.Five.browser import BrowserView
+from StringIO import StringIO
 from ftw.ech0039.xmlexport import XMLExporter
 from plone.uuid.interfaces import IUUID
 
@@ -6,7 +7,7 @@ from plone.uuid.interfaces import IUUID
 class ExportView(BrowserView):
 
     def __call__(self):
-        memfile = XMLExporter(self.context).make_zipfile()
+        memfile = XMLExporter(self.context).make_zipfile(StringIO())
         filename = IUUID(self.context)
         self._write_to_response(memfile, filename)
 

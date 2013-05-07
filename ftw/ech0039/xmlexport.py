@@ -16,13 +16,12 @@ class XMLExporter(object):
         self.context = context
         self.marshaller = ContentMarshaller().add(self.context)
 
-    def make_zipfile(self):
-        memfile = StringIO()
-        zipfile = ZipFile(memfile, mode='w')
+    def make_zipfile(self, output_file):
+        zipfile = ZipFile(output_file, mode='w')
         zipfile.writestr(self.XML_FILENAME, self.get_xml_message())
         self.write_files(zipfile)
         zipfile.close()
-        return memfile
+        return output_file
 
     def get_xml_message(self):
         """Return the xml message as string.

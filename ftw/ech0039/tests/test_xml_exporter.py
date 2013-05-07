@@ -5,6 +5,7 @@ from ftw.testing import MockTestCase
 from plone.uuid.interfaces import IUUID
 from zipfile import ZipFile
 import hashlib
+from StringIO import StringIO
 
 
 class TestXmlExport(MockTestCase):
@@ -148,7 +149,7 @@ class TestXmlExport(MockTestCase):
         expected_file_uuid = IUUID(child_file)
         expected_filename = u'files/{}.txt'.format(expected_file_uuid)
 
-        memfile = XMLExporter(parent_folder).make_zipfile()
+        memfile = XMLExporter(parent_folder).make_zipfile(StringIO())
         zipfile = ZipFile(memfile)
         self.assertEqual([XMLExporter.XML_FILENAME, expected_filename],
                          zipfile.namelist())
