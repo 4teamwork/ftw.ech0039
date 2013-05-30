@@ -40,7 +40,7 @@ setup(name='ftw.ech0039',
           'plone.api',
           'plone.uuid',
           'setuptools',
-          'PyXB',
+          'PyXB<=1.2.1',  # generated bindings do not work with 1.2.2
           'Products.CMFCore',
           'Products.ATContentTypes',
           'zope.interface',
