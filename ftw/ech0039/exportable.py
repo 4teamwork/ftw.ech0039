@@ -91,14 +91,17 @@ class FileAdapter(AbstractExportable):
     def hash_function_name(self):
         return u'SHA-256'
 
+    def append_files(self, data):
+        data['files'] = BIND(BIND(
+                pathFileName=self.file_path,
+                mimeType=self.mime_type,
+                hashCode=self.hash_code,
+                hashCodeAlgorithm=self.hash_function_name,
+            ))
+
     def get_data(self):
         data = super(FileAdapter, self).get_data()
-        data['files'] = BIND(BIND(
-            pathFileName=self.file_path,
-            mimeType=self.mime_type,
-            hashCode=self.hash_code,
-            hashCodeAlgorithm=self.hash_function_name,
-            ))
+        self.append_files(data)
         return data
 
     def write_file(self, zipfile):
