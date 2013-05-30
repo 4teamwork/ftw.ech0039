@@ -8,7 +8,7 @@ class ExportView(BrowserView):
 
     def __call__(self):
         memfile = XMLExporter(self.context).make_zipfile(StringIO())
-        filename = IUUID(self.context)
+        filename = "{}.zip".format(IUUID(self.context))
         self._write_to_response(memfile, filename)
 
     def _write_to_response(self, stringio, zipfilename):
