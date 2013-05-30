@@ -2,7 +2,6 @@ from ftw.ech0039.bind import BIND
 from ftw.ech0039.interfaces import IECH0039Document
 from ftw.ech0039.interfaces import IECH0039Dossier
 from ftw.ech0039.interfaces import IECH0039Exportable
-from zope.component import getAdapter
 from zope.component import queryAdapter
 
 
