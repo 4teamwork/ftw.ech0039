@@ -1,4 +1,6 @@
+from pyxb.binding import datatypes as xs
 import re
+from DateTime.interfaces import IDateTime
 
 
 def as_normalized_string(text):
@@ -22,3 +24,14 @@ def as_token(text):
     """
     normalized_string = as_normalized_string(text)
     return normalized_string.strip().replace(u'  ', u' ')
+
+
+def as_date(date):
+    """Convert a either date (or datetime) or a DateTime object to an
+    xs.date object.
+
+    """
+
+    if IDateTime.providedBy(date):
+        return xs.date(date.year(), date.month(), date.day())
+    return xs.date(date.year, date.month, date.day)
