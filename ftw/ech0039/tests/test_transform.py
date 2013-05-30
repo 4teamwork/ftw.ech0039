@@ -4,6 +4,7 @@ from datetime import datetime
 from ftw.ech0039 import transform
 from pyxb.binding import datatypes as xs
 import unittest2
+from ftw.ech0039.bind import BIND
 
 
 class TestAsToken(unittest2.TestCase):
@@ -50,3 +51,11 @@ class TestAsToken(unittest2.TestCase):
                          transform.as_date(DateTime(2010, 1, 1)))
         self.assertEqual(xs.date(2010, 1, 1),
                          transform.as_date(DateTime(2010, 1, 1, 15, 2, 7)))
+
+    def test_as_tokens(self):
+        """Test that a list of strings can be converted to bound tokens.
+
+        """
+
+        self.assertEqual(BIND('foo qux', 'bar'),
+                         transform.as_tokens(('foo qux', '  bar ')))
