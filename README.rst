@@ -20,7 +20,3 @@ Copyright
 This package is copyright by `4teamwork <http://www.4teamwork.ch/>`_.
 
 ``ftw.ech0039`` is licensed under GNU General Public License, version 2.
-
-.. image:: https://cruel-carlota.pagodabox.com/ed1ddac0ad481ec3067303fa3f19f249
-   :alt: githalytics.com
-   :target: http://githalytics.com/4teamwork/ftw.ech0039
